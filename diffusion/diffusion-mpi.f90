@@ -66,7 +66,7 @@ program diffuse
 
        locxleft = xleft + dx*(startn-1)
 
-       write(imgstr,'(I03)') rank
+       write(imgstr,'(I03)') rank+1
 ! 
 ! allocate data, including ghost cells: old and new timestep
 ! theory doesn't need ghost cells, but we include it for simplicity
