@@ -107,14 +107,11 @@ program diffuse
 !
            sync images(neighbours(1:nneighbours))
            if (this_image() /= 1) then
-              temperature(1,old) = &
-                 temperature(locnpoints+1,old)[left]
+              temperature(1,old) = temperature(locnpoints+1,old)[left]
            endif
            if (this_image() /= num_images()) then
-              temperature(locnpoints+2,old) = &
-                  temperature(2,old)[right]
+              temperature(locnpoints+2,old) = temperature(2,old)[right]
            endif
-           sync images(neighbours(1:nneighbours))
 
 !
 ! update solution
