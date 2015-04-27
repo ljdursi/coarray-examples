@@ -130,13 +130,9 @@ program diffuse
            a = ao*sigmao/sigma
            theory = a*exp(-(x)**2 / (2.*sigma**2))
 
-           error = sqrt(sum((theory(2:locnpoints+1) - temperature(2:locnpoints+1,new))**2))
-
-           print *, 'Step = ', step, 'Time = ', time, ' Err = ', error
-
            old = new
            new = new + 1
-           if (new == 3) new = 1
+           if (new > 2) new = 1
        enddo
 
        open(newunit=unitno,file=imgstr//'-output.txt')

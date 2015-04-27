@@ -1,5 +1,7 @@
 program diffuse
+       use mpi
        implicit none
+   
 !
 ! simulation parameters
 !
@@ -13,7 +15,7 @@ program diffuse
 ! solution from theory
 !
        real, allocatable :: x(:)
-       real, allocatable :: temperature(:,:)[:]
+       real, allocatable :: temperature(:,:)
        real, allocatable :: theory(:)
 
        integer :: old=1, new=2
@@ -32,47 +34,45 @@ program diffuse
        real :: a, sigma
        real :: fixedlefttemp, fixedrighttemp
 
-       integer :: locnpoints, start
-       integer :: left, right, nneighbours=0
-       integer :: neighbours(2)
+!
+!  mpi variables
+! 
+       integer :: ierr, rank, comsize
+       integer :: locnpoints, startn, endn
        real    :: locxleft
+       integer :: left, right
+       integer :: lefttag=1, righttag=2
+       integer, dimension(MPI_STATUS_SIZE) :: statuses(4)
+       integer :: requests(2)
 
-!
-! find local number of points and where we start in the
-! global domain
-!  
-       locnpoints = totpoints/num_images()
-       start = locnpoints*(this_image()-1)+1
-       if (this_image() == num_images()) then
-           locnpoints = totpoints - locnpoints*(num_images()-1)
-       endif
-       left = this_image()-1
-       right= this_image()+1
-       if ( left >= 1 ) then
-           nneighbours = nneighbours+1
-           neighbours(nneighbours) = left
-       endif
-       if ( right <= num_images() ) then
-           nneighbours = nneighbours+1
-           neighbours(nneighbours) = right
-       endif
-!
+       call MPI_Init(ierr)
+       call MPI_Comm_size(MPI_COMM_WORLD,comsize,ierr)
+       call MPI_Comm_rank(MPI_COMM_WORLD,rank,ierr)
+
+       locnpoints = totpoints/comsize
+       startn = rank*locnpoints+1
+       endn   = startn + locnpoints
+       if (rank == comsize-1) endn=totpoints+1
+       locnpoints = endn-startn
+   
+       left = rank-1
+       if (left < 0) left = MPI_PROC_NULL
+       right = rank+1
+       if (right >= comsize) right = MPI_PROC_NULL
 !
 ! set parameters
 !
        dx = (xright-xleft)/(totpoints-1)
        dt = dx**2 * kappa/10.
 
-       locxleft = xleft + dx*(start-1)
-! prefix for our files
-!
-       write(imgstr,'(I03)') this_image()
+       locxleft = xleft + dx*(startn-1)
 
+       write(imgstr,'(I03)') rank+1
 ! 
 ! allocate data, including ghost cells: old and new timestep
 ! theory doesn't need ghost cells, but we include it for simplicity
 !
-       allocate(temperature(locnpoints+2,2)[*])
+       allocate(temperature(locnpoints+2,2))
        allocate(theory(locnpoints+2))
        allocate(x(locnpoints+2))
 !
@@ -103,20 +103,22 @@ program diffuse
            temperature(locnpoints+2,old) = fixedrighttemp
 
 !
-! exchange boundary information
+! begin exchange of boundary information
 !
-           sync images(neighbours(1:nneighbours))
-           if (this_image() /= 1) then
-              temperature(1,old) = temperature(locnpoints+1,old)[left]
-           endif
-           if (this_image() /= num_images()) then
-              temperature(locnpoints+2,old) = temperature(2,old)[right]
-           endif
+
+           call MPI_Isend(temperature(locnpoints+1,old), 1, MPI_REAL, &
+                          right, righttag, MPI_COMM_WORLD, requests(1), ierr)
+           call MPI_Isend(temperature(2,old), 1, MPI_REAL, &
+                          left, lefttag,  MPI_COMM_WORLD, requests(2), ierr)
+           call MPI_Irecv(temperature(1,old), 1, MPI_REAL, &
+                          left,  righttag, MPI_COMM_WORLD, requests(3), ierr)
+           call MPI_Irecv(temperature(locnpoints+2,old), 1, MPI_REAL, &
+                          right, lefttag, MPI_COMM_WORLD, requests(4), ierr)
 
 !
 ! update solution
 !
-           forall (i=2:locnpoints+1)
+           forall (i=3:locnpoints)
                temperature(i,new) = temperature(i,old) + &
                      dt*kappa/(dx**2) * (                &
                           temperature(i+1,old) -         &
@@ -126,6 +128,17 @@ program diffuse
            end forall
            time = time + dt
 
+!
+! wait for communications to complete
+!
+           call MPI_Waitall(4, requests, statuses, ierr)
+!
+! update solution
+!
+           temperature(2,new) = temperature(2,old) + dt*kappa/(dx**2) *  &
+                        ( temperature(1,old) - 2*temperature(2, old) + temperature(3,old) )
+           temperature(locnpoints+1,new) = temperature(locnpoints+1,old) + dt*kappa/(dx**2) *  &
+                        ( temperature(locnpoints,old) - 2*temperature(locnpoints+1, old) + temperature(locnpoints+2,old) )
 ! 
 ! update correct solution
 !
@@ -143,8 +156,9 @@ program diffuse
           write(unitno,'(3(F8.3,3X))'),x(i),temperature(i,new), theory(i)
        enddo
        close(unitno)
- 
+
        deallocate(temperature)
        deallocate(theory)
        deallocate(x)
-end program diffuse
+       call MPI_Finalize(ierr)
+       end program diffuse
