@@ -8,8 +8,8 @@ program MPIHelloworld
    call MPI_Comm_rank(MPI_COMM_WORLD, rank, ierr)
 
 
-   print *, 'Hello, world, from image ', rank, &
-            'of ', size, '!'!
+   print *, 'Hello, world, from image ', rank,  &
+            'of ', comsize, '!'
 
    call MPI_Finalize(ierr)
 end program MPIHelloWorld

@@ -5,7 +5,7 @@ program broadcast
     integer :: ierr, rank
 
     call MPI_Init(ierr)
-    call MPI_Comm_rank(MPI_COMM_RANK, rank, ierr)
+    call MPI_Comm_rank(MPI_COMM_WORLD, rank, ierr)
 
     if (rank == 0) then 
         print *, "Please enter a number." 

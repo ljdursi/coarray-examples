@@ -39,7 +39,7 @@ program blockmatrix
     sync all
     c = 0.
     do k=1,ncols
-        c = c + matmul(a[myrow,k],b[k,mycol])
+        c = c + matmul(a(:,:)[myrow,k],b(:,:)[k,mycol])
     enddo
     sync all
 

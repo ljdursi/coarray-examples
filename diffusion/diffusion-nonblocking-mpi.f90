@@ -43,7 +43,7 @@ program diffuse
        integer :: left, right
        integer :: lefttag=1, righttag=2
        integer, dimension(MPI_STATUS_SIZE) :: statuses(4)
-       integer :: requests(2)
+       integer :: requests(4)
 
        call MPI_Init(ierr)
        call MPI_Comm_size(MPI_COMM_WORLD,comsize,ierr)
@@ -86,7 +86,7 @@ program diffuse
        fixedlefttemp = ao*exp(-(xleft-dx)**2 / (2.*sigmao**2))
        fixedrighttemp= ao*exp(-(xright+dx)**2 / (2.*sigmao**2))
 
-       open(newunit=unitno,file=imgstr//'-ics.txt')
+       open(newunit=unitno,file=trim(adjustl(imgstr))//'-ics.txt')
        do i=2,locnpoints+1
           write(unitno,'(3(F8.3,3X))'),x(i),temperature(i,old), theory(i)
        enddo
@@ -151,7 +151,7 @@ program diffuse
            if (new > 2) new = 1
        enddo
 
-       open(newunit=unitno,file=imgstr//'-output.txt')
+       open(newunit=unitno,file=trim(adjustl(imgstr))//'-output.txt')
        do i=2,locnpoints+1
           write(unitno,'(3(F8.3,3X))'),x(i),temperature(i,new), theory(i)
        enddo
