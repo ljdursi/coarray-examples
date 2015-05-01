@@ -7,7 +7,7 @@ backend, one compiles and runs these programs as follows:
 
 ```
 mpifort diffusion/diffusion-coarray.f90 -fcoarray=lib -o diffusion/diffusion-coarray -L ${PATH_TO_OPENCOARRAY_LIB} -lcaf_mpi
-mpirun -np 8 testReduction
+mpirun -np 8 diffusion/diffusion-coarray 
 ```
 
 A Makefile is provided which you can edit to include the relevant paths.
