@@ -11,11 +11,11 @@ To use this Virtual Machine,
 * Install [Vagrant](https://www.vagrantup.com)
 * Install [VirtualBox](https://www.virtualbox.org)
 * To build the VM yourself,
-    * Type `vagrant up` and the base VM will install, as will the software
+    * Type `vagrant up` in this directory and the base VM will install, as will the software
     * The gcc build can take about an hour.
 * Otherwise, in a seperate directory,
     * Type `vagrant init ljdursi/opencoarrayVM`
     * Type `vagrant up`; this will download and start the binary VM.
-* Once the VM is up and runnnig, type `vagrant ssh` to log into the VM.
+* Once the VM is up and runnning, type `vagrant ssh` in that directory to log into the VM.
 * From there, you should be able to `cd coarray-examples` and type `make` to build the examples.
 * Then, _eg_, `mpirun -np 4 helloworld/hw-coarray` will run them.
