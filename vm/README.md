@@ -18,4 +18,4 @@ To use this Virtual Machine,
     * Type `vagrant up`; this will download and start the binary VM.
 * Once the VM is up and runnnig, type `vagrant ssh` to log into the VM.
 * From there, you should be able to `cd coarray-examples` and type `make` to build the examples.
-* Then, eg, `mpirun -np 4 helloworld/hw-coarray` will run them.
+* Then, _eg_, `mpirun -np 4 helloworld/hw-coarray` will run them.

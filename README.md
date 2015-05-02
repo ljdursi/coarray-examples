@@ -11,3 +11,6 @@ mpirun -np 8 diffusion/diffusion-coarray
 ```
 
 A Makefile is provided which you can edit to include the relevant paths.
+
+If you don't have gcc 5.1 and opencoarrays installed, you can use the available vagrant VM; 
+documentation for downloading the vagrant VM or building it can be found [in the vm directory](vm/README.md)
