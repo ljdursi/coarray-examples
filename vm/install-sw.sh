@@ -40,7 +40,7 @@ rm -rf mpich-3.1.4 mpich-3.1.4.tar.gz
 cd ..
 git clone https://github.com/sourceryinstitute/opencoarrays.git
 cd opencoarrays
-FC=/opt/gcc/5.1/bin/gfortran GCC=/opt/gcc/5.1/bin/gcc MPFC=/opt/mpich/3.1.4/bin/mpifort make mpi
+FC=/opt/gcc/5.1/bin/gfortran GCC=/opt/gcc/5.1/bin/gcc MPFC=/opt/mpich/3.1.4/bin/mpifort MPICC=/opt/mpich/3.1.4/bin/mpicc make mpi
 sudo mkdir -p /opt/opencoarrays/lib64
 sudo cp mpi/libcaf_mpi.a /opt/opencoarrays/lib64
 
